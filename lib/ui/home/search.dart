@@ -21,7 +21,6 @@ class AllArticlesWidget extends StatelessWidget {
     return FutureBuilder<NewsResponse?>(
       future: ApiManager.getNewsBySourceId(
         sourceId: "",
-        language: languageProvider.appLanguage,
         query: searchQuery.isEmpty ? null : searchQuery,
       ),
       builder: (context, snapshot) {

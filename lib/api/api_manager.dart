@@ -13,14 +13,12 @@ import 'end_points.dart';
 class ApiManager {
   static Future<SourceResponse?> getSources(
       String categoryID,
-      String language,
       ) async {
     // authority => The domain name of the server
     // unencodedPath => The path to the resource on the server
     Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.sourceApi, {
       'apiKey': ApiConstants.apiKey,
       'category': categoryID,
-      'language': language,
     });
     try {
       var response = await http.get(url);
@@ -34,7 +32,6 @@ class ApiManager {
 
   static Future<NewsResponse?> getNewsBySourceId({
     required String sourceId,
-    required String language,
     int page = 1,
     int pageSize = 20,
     String? query,
@@ -42,7 +39,6 @@ class ApiManager {
     Uri url = Uri.https(ApiConstants.baseUrl, EndPoints.newsApi, {
       'apiKey': ApiConstants.apiKey,
       'sources': sourceId,
-      'language': language,
       'page': page.toString(),
       'pageSize': pageSize.toString(),
       if (query != null && query.isNotEmpty) 'q': query,

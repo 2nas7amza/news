@@ -25,7 +25,6 @@ class _CategoryDetailsState extends State<CategoryDetails> {
     return FutureBuilder<SourceResponse?>(
       future: ApiManager.getSources(
         widget.category.id,
-        languageProvider.appLanguage,
       ),
       builder: (context, snapshot) {
         // loading
@@ -47,7 +46,6 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                 onPressed: () {
                   ApiManager.getSources(
                     widget.category.id,
-                    languageProvider.appLanguage,
                   );
                   setState(() {}); // Refresh the widget to try again
                 },
@@ -73,7 +71,6 @@ class _CategoryDetailsState extends State<CategoryDetails> {
                 onPressed: () {
                   ApiManager.getSources(
                     widget.category.id,
-                    languageProvider.appLanguage,
                   );
                   setState(() {});
                 },

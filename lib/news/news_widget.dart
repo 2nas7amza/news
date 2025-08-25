@@ -1,6 +1,9 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news/news/cuibt/news_state.dart';
+import 'package:news/news/cuibt/news_view_model.dart';
 import 'package:news/news/news_deatils.dart';
 
 import 'package:provider/provider.dart';
@@ -14,14 +17,15 @@ import '../utils/app_colors.dart';
 import 'news_item.dart';
 
 class NewsWidget extends StatefulWidget {
-  final Source source;
-  const NewsWidget({super.key, required this.source});
+   Source source;
+   NewsWidget({super.key, required this.source});
 
   @override
   State<NewsWidget> createState() => _NewsWidgetState();
 }
 
 class _NewsWidgetState extends State<NewsWidget> {
+
   final ScrollController scrollController =
   ScrollController();
   final List<Articles> articles = [];
@@ -44,6 +48,7 @@ class _NewsWidgetState extends State<NewsWidget> {
         fetchNews();
       }
     });
+    viewModel.getSource(widget.source);
   }
 
   @override
@@ -82,7 +87,6 @@ class _NewsWidgetState extends State<NewsWidget> {
     try {
       final response = await ApiManager.getNewsBySourceId(
         sourceId: widget.source.id ?? "",
-        language: languageProvider.appLanguage,
         page: currentPage,
         pageSize: 20,
       );
@@ -114,91 +118,153 @@ class _NewsWidgetState extends State<NewsWidget> {
 
     setState(() => isLoading = false);
   }
+  NewsViewModel viewModel=NewsViewModel();
 
   @override
   Widget build(BuildContext context) {
-    if (errorMessage != null && articles.isEmpty) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            errorMessage!,
-            style: Theme.of(context).textTheme.labelMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: fetchNews,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.greyColor,
-            ),
-            child: Text(
-              'Try Again',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (articles.isEmpty && isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.greyColor),
-      );
-    }
-
-    if (articles.isEmpty && !isLoading) {
-      return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noArticles,
-          style: Theme.of(context).textTheme.labelLarge,
-        ),
-      );
-    }
-
-
-    return ListView.builder(
-      controller: scrollController,
-      itemCount: articles.length + 1,
-      itemBuilder: (context, index) {
-        if (index < articles.length) {
-          var article = articles[index];
-          return InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    return BlocBuilder<NewsViewModel,NewsState>(
+      bloc: viewModel,
+        builder: (context, state) {
+          if (state is NewsLoadingState) {
+            return Center(
+              child: CircularProgressIndicator(color: AppColors.greyColor),
+            );
+          }
+          else if (state is NewsErrorState) {
+            return Column(
+              children: [
+                Text(
+                  state.errorMessage,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .labelMedium,
                 ),
-                builder: (context) => NewsDetailsBottomSheet(article: article),
-              );
-            },
-            child: NewsItem(news: article),
-          );
-        } else {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Center(
-              child: !hasMore
-                  ? Text(
-                'No more news available',
-                style: Theme.of(context).textTheme.labelLarge,
-              )
-                  : isLoading
-                  ? const CircularProgressIndicator(color: AppColors.greyColor)
-                  : const SizedBox.shrink(),
-            ),
-          );
-        }
-      },
-    );
+                ElevatedButton(
+                  onPressed: () {
+                    viewModel.getSource(widget.source.id);
+                    setState(() {});
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.greyColor,
+                  ),
+                  child: Text(
+                    'Try Again',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .labelMedium,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          else if (state is NewsSuccessState) {
+            return ListView.builder(
+                controller: scrollController,
+                itemCount: articles.length + 1,
+                itemBuilder: (context, index) {
+                  if (index < articles.length) {
+                    var article = articles[index];
+                    return InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape:  RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20)),
+                          ),
+                          builder: (context) =>
+                              NewsDetailsBottomSheet(article: article),
+                        );
+                      },
+                      child: NewsItem(news: article),
+                    );
+                  }
+                }
+
+            );
+          }
+          return Column();
+        });
+    }
   }
 
-  @override
-  void dispose() {
-    scrollController
-        .dispose();
-    super.dispose();
-  }
-}
+
+    // if (errorMessage != null && articles.isEmpty) {
+    //   return Column(
+    //     mainAxisAlignment: MainAxisAlignment.center,
+    //     children: [
+    //       Text(
+    //         errorMessage!,
+    //         style: Theme.of(context).textTheme.labelMedium,
+    //         textAlign: TextAlign.center,
+    //       ),
+    //       const SizedBox(height: 12),
+    //       ElevatedButton(
+    //         onPressed: fetchNews,
+    //         style: ElevatedButton.styleFrom(
+    //           backgroundColor: AppColors.greyColor,
+    //         ),
+    //         child: Text(
+    //           'Try Again',
+    //           style: Theme.of(context).textTheme.labelMedium,
+    //         ),
+    //       ),
+    //     ],
+    //   );
+    // }
+    //
+    // if (articles.isEmpty && isLoading) {
+    //   return const Center(
+    //     child: CircularProgressIndicator(color: AppColors.greyColor),
+    //   );
+    // }
+    //
+    // if (articles.isEmpty && !isLoading) {
+    //   return Center(
+    //     child: Text(
+    //       AppLocalizations.of(context)!.noArticles,
+    //       style: Theme.of(context).textTheme.labelLarge,
+    //     ),
+    //   );
+    // }
+    //
+    //
+    // return ListView.builder(
+    //   controller: scrollController,
+    //   itemCount: articles.length + 1,
+    //   itemBuilder: (context, index) {
+    //     if (index < articles.length) {
+    //       var article = articles[index];
+    //       return InkWell(
+    //         onTap: () {
+    //           showModalBottomSheet(
+    //             context: context,
+    //             isScrollControlled: true,
+    //             shape: const RoundedRectangleBorder(
+    //               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    //             ),
+    //             builder: (context) => NewsDetailsBottomSheet(article: article),
+    //           );
+    //         },
+    //         child: NewsItem(news: article),
+    //       );
+    //     } else {
+    //       return Padding(
+    //         padding: const EdgeInsets.symmetric(vertical: 16),
+    //         child: Center(
+    //           child: !hasMore
+    //               ? Text(
+    //             'No more news available',
+    //             style: Theme.of(context).textTheme.labelLarge,
+    //           )
+    //               : isLoading
+    //               ? const CircularProgressIndicator(color: AppColors.greyColor)
+    //               : const SizedBox.shrink(),
+    //         ),
+    //       );
+    //     }
+    //   }

@@ -1,31 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news/provider/app_language_provider.dart';
 import 'package:news/provider/app_theme_provider.dart';
 import 'package:news/ui/home/home_screen.dart';
 import 'package:news/utils/app_routes.dart';
 import 'package:news/utils/app_theme.dart';
+import 'package:news/utils/observeble_bloc.dart';
 
 import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
+final languageProvider = AppLanguageProvider();
+await languageProvider.initialize();
 
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => AppLanguageProvider()),
-        ChangeNotifierProvider(create: (context) => AppThemeProvider()),
+final themeProvider = AppThemeProvider();
+await themeProvider.initialize();
+
+  Bloc.observer = MyBlocObserver();
+    runApp(
+      MultiProvider(
+          providers: [
+            ChangeNotifierProvider(   create:(context) => languageProvider,),
+            ChangeNotifierProvider(create: (context) => themeProvider,),
       ],
-
       child: MyApp(),
-    ),
-  );
+      )
+    );
 }
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

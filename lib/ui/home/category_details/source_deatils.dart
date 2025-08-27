@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news/di/di.dart';
 import 'package:news/source/source_tab.dart';
 import 'package:news/ui/home/category_details/cuibt/source_state.dart';
 import 'package:news/ui/home/category_details/cuibt/source_view_model.dart';
@@ -20,7 +21,8 @@ class SourceDetails extends StatefulWidget {
 }
 
 class _SourceDetailsState extends State<SourceDetails> {
-  SourceViewModel viewModel=SourceViewModel();
+  SourceViewModel viewModel = SourceViewModel(
+      sourceRepository: injectSourceRepository());
   @override
   void initState() {
     // TODO: implement initState

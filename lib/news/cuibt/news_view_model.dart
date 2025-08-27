@@ -1,15 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news/api/api_manager.dart';
+import 'package:news/data/repository/news/repository/news_repository.dart';
 import 'package:news/news/cuibt/news_state.dart';
 import 'package:news/ui/home/category_details/cuibt/source_state.dart';
 
 class NewsViewModel extends Cubit<NewsState>{
-  NewsViewModel():super(NewsLoadingState());
+  NewsRepository newsRepository;
+
+  NewsViewModel({required this.newsRepository}) :super(NewsLoadingState());
 
   void getSource(categoryID)async{
     try{
       emit(NewsLoadingState());
-      var response=await ApiManager.getNewsBySourceId(sourceId: categoryID,);
+      var response = await newsRepository.getSources(categoryID,);
       if(response?.status =='error'){
         emit(NewsErrorState(errorMessage: response!.message!));
         return;

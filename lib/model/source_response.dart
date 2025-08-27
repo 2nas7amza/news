@@ -1,8 +1,18 @@
+import 'package:hive/hive.dart';
 
-class SourceResponse {
+part 'source_response.g.dart';
+
+///todo:flutter package pub run build_runner build ,when we need use hive adapter
+
+@HiveType(typeId: 0)
+class SourceResponse extends HiveObject {
+  @HiveField(0)
   String? status;
+  @HiveField(1)
   List<Source>? sources;
+  @HiveField(2)
   String? code;
+  @HiveField(3)
   String? message;
 
   SourceResponse({this.status, this.sources, this.code, this.message});
@@ -31,13 +41,21 @@ class SourceResponse {
   }
 }
 
-class Source {
+@HiveType(typeId: 1)
+class Source extends HiveObject {
+  @HiveField(0)
   String? id;
+  @HiveField(1)
   String? name;
+  @HiveField(2)
   String? description;
+  @HiveField(3)
   String? url;
+  @HiveField(4)
   String? category;
+  @HiveField(5)
   String? language;
+  @HiveField(6)
   String? country;
 
   Source({

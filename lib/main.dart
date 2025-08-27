@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:news/model/source_response.dart';
 import 'package:news/provider/app_language_provider.dart';
 import 'package:news/provider/app_theme_provider.dart';
 import 'package:news/ui/home/home_screen.dart';
 import 'package:news/utils/app_routes.dart';
 import 'package:news/utils/app_theme.dart';
 import 'package:news/utils/observeble_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
 
@@ -18,6 +21,10 @@ await languageProvider.initialize();
 
 final themeProvider = AppThemeProvider();
 await themeProvider.initialize();
+  final appDocumentsDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentsDir.path);
+  Hive.registerAdapter(SourceResponseAdapter());
+  Hive.registerAdapter(SourceAdapter());
 
   Bloc.observer = MyBlocObserver();
     runApp(
